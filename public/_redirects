@@ -1,0 +1,2 @@
+# Existing assets are served normally; app routes use the SPA entry point.
+/* /index.html 200

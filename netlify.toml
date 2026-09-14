@@ -1,0 +1,12 @@
+[build]
+  command = "pnpm test && pnpm build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "24"
+  PNPM_VERSION = "12.4.1"
+  PNPM_FLAGS = "--frozen-lockfile"
+
+# Headers and SPA rewrites live in public/_headers and public/_redirects.
+# Vite copies these into dist, so manual folder uploads also receive them.
+# Set the two VITE_* connection variables in Netlify's build environment.
