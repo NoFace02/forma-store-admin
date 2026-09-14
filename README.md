@@ -20,4 +20,6 @@ React, TypeScript, Vite, Tailwind CSS, TanStack Query, Recharts, and Supabase. H
 
 All customers, products, orders, and financial figures are fictional. This project showcases frontend design, data visualization, and database-enforced access control—not a live store.
 
-Dashboard access currently requires an owner-managed account. Public registration is not available in the interface.
+Every registered, non-anonymous account automatically receives workspace access and its own read-only sample data. Existing accounts have also been provisioned. Public registration is not available in the interface; accounts can be added through Supabase Authentication.
+
+The database setup is recorded in `database/automatic-demo-access.sql` (already applied to the connected project). It creates a private sample-data template and provisions accounts through an `auth.users` insert trigger. Row-level security restricts each account to its own records. This setup script is intended to run once.
