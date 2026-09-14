@@ -7,3 +7,14 @@ dist/
 .netlify/
 .env.*
 !.env.example
+
+# Keep only the main README in version control.
+*.[mM][dD]
+!/README.md
+
+# Local logs, test output, and operating-system files.
+*.log
+coverage/
+.DS_Store
+Thumbs.db
+Desktop.ini
