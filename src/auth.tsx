@@ -10,8 +10,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!supabase) return;
     let active = true;
-    supabase.auth.getSession().then(({ data, error }) => { if (active) { setSession(data.session); setError(error?.message ?? null); setLoading(false); } }).catch(() => { if (active) { setError('Unable to restore your session. Reload to try again.'); setLoading(false); } });
-    const { data } = supabase.auth.onAuthStateChange((_event, next) => { setSession(next); setLoading(false); });
+    let receivedAuthEvent = false;
+    supabase.auth.getSession().then(({ data, error }) => { if (active && !receivedAuthEvent) { setSession(data.session); setError(error?.message ?? null); setLoading(false); } }).catch(() => { if (active && !receivedAuthEvent) { setError('Unable to restore your session. Reload to try again.'); setLoading(false); } });
+    const { data } = supabase.auth.onAuthStateChange((_event, next) => {
+      if (!active) return;
+      receivedAuthEvent = true;
+      setSession(next);
+      setError(null);
+      setLoading(false);
+    });
     return () => { active = false; data.subscription.unsubscribe(); };
   }, []);
   return <AuthContext.Provider value={{session, loading, error}}>{children}</AuthContext.Provider>;

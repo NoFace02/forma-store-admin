@@ -1,0 +1,1 @@
+.action-row{cursor:pointer;outline:none}.action-row:focus-visible{outline:3px solid var(--accent);outline-offset:-3px}.action-row:focus-visible td{background:color-mix(in srgb,var(--accent) 10%,transparent)}

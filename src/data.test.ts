@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import {createOrders,getItems,monthlyData,pageItems,summarize} from './data';
+import {createOrders,getItems,monthlyData,pageItems,summarize,validRecord} from './data';
 const anchor = new Date(2026,0,14);
 const database = vi.hoisted(() => ({from: vi.fn(),select: vi.fn(),eq: vi.fn(),order: vi.fn(),limit: vi.fn(),abortSignal: vi.fn()}));
 vi.mock('./supabase', () => ({supabase: database}));
@@ -32,9 +32,28 @@ it('reports HTTP and unexpected API responses and forwards cancellation',async()
  await expect(getItems('users')).rejects.toThrow('Could not load users');
  database.limit.mockResolvedValue({error:null,data:null});
  await expect(getItems('users')).rejects.toThrow('Unexpected users response');
- const signal=new AbortController().signal; database.limit.mockReturnValue(database); database.abortSignal.mockResolvedValue({error:null,data:[{payload:{id:1}}]});
- expect(await getItems('users',signal)).toEqual([{id:1}]);
+ database.limit.mockResolvedValue({error:null,data:[{payload:{id:1}}]});
+ await expect(getItems('users')).rejects.toThrow('Unexpected users response');
+ const user = {id:1,firstName:'Morgan',lastName:'Hayes',email:'customer1@example.com'};
+ const signal=new AbortController().signal; database.limit.mockReturnValue(database); database.abortSignal.mockResolvedValue({error:null,data:[{payload:user}]});
+ expect(await getItems('users',signal)).toEqual([user]);
  expect(database.from).toHaveBeenLastCalledWith('forma_demo_records');
  expect(database.eq).toHaveBeenLastCalledWith('resource','users');
  expect(database.abortSignal).toHaveBeenLastCalledWith(signal);
+});
+it('validates required fields while allowing missing optional information', () => {
+ const user = {id:1,firstName:'Morgan',lastName:'Hayes',email:'customer1@example.com',company:null};
+ const product = {id:1,title:'Mug',category:'home',price:18.75,stock:0,thumbnail:''};
+ const cart = {id:1,userId:1,discountedTotal:0,totalQuantity:0};
+ expect(validRecord('users',user)).toBe(true);
+ expect(validRecord('products',product)).toBe(true);
+ expect(validRecord('carts',cart)).toBe(true);
+ expect(validRecord('users',{...user,firstName:''})).toBe(false);
+ expect(validRecord('users',{...user,company:{}})).toBe(false);
+ expect(validRecord('products',{...product,price:NaN})).toBe(false);
+ expect(validRecord('products',{...product,stock:-1})).toBe(false);
+ expect(validRecord('products',{...product,description:123})).toBe(false);
+ expect(validRecord('carts',{...cart,userId:0})).toBe(false);
+ expect(validRecord('carts',{...cart,totalQuantity:1.5})).toBe(false);
+ expect(validRecord('products',[])).toBe(false);
 });
